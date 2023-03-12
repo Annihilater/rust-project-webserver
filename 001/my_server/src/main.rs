@@ -1,14 +1,18 @@
-use std::net::{TcpListener, TcpStream};
+use std::{
+    io::Read,
+    net::{TcpListener, TcpStream},
+};
 
-fn handle_client(stream: TcpStream) {
-    // ...
-    println!("收到一些内容");
+fn handle_client(mut stream: TcpStream) {
+    let mut buffer = [0; 512];
+    stream.read(&mut buffer).unwrap();
+    println!("Request: {}", String::from_utf8_lossy(&buffer));
+    println!("----------------------------------------------------")
 }
 
 fn main() -> std::io::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:8080")?;
 
-    // accept connections and process them serially
     for stream in listener.incoming() {
         handle_client(stream?);
     }
