@@ -11,19 +11,18 @@ fn handle_client(mut stream: TcpStream) {
     println!("----------------------------------------------------");
 
     let get = b"GET / HTTP/1.1\r\n";
-    if buffer.starts_with(get) {
-        // 返回 main.html 内容
-        let content = fs::read_to_string("main.html").unwrap();
-        let response = format!("HTTP/1.1 200 ok\r\n\r\n{}", content);
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+
+    let (status_line, filename) = if buffer.starts_with(get) {
+        ("HTTP/1.1 200 OK\r\n\r\n", "main.html")
     } else {
-        // 返回 404.html 内容
-        let content = fs::read_to_string("404.html").unwrap();
-        let response = format!("HTTP/1.1 404 ok\r\n\r\n{}", content);
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
     };
+
+    let content = fs::read_to_string(filename).unwrap();
+    let response = format!("{}{}", status_line, content);
+
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
 
 fn main() -> std::io::Result<()> {
